@@ -6,23 +6,65 @@
   <title>JM Investment Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen p-6">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen p-4 md:p-6">
 
   <div class="max-w-4xl mx-auto">
     <!-- Header -->
-    <header class="border-b border-slate-800 pb-4 mb-8 flex justify-between items-center">
+    <header class="border-b border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl md:text-3xl font-extrabold text-blue-500">JM Investment Dashboard</h1>
         <p class="text-xs md:text-sm text-slate-400">Live Asset & Crypto Tracker</p>
       </div>
-      <span class="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold rounded-full">Live</span>
+      <div class="flex items-center gap-3">
+        <button onclick="openDepositModal('General')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition shadow-lg shadow-blue-500/20 active:scale-95">
+          + Deposit Funds
+        </button>
+        <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold rounded-full">Live</span>
+      </div>
     </header>
 
     <!-- Market Cards -->
-    <div id="crypto-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div id="crypto-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       <div class="p-5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 animate-pulse">
         Loading live rates...
       </div>
+    </div>
+  </div>
+
+  <!-- Deposit Modal -->
+  <div id="deposit-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+      <button onclick="closeDepositModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">✕</button>
+      
+      <h3 class="text-xl font-bold text-white mb-1">Deposit Funds</h3>
+      <p class="text-xs text-slate-400 mb-6">Selected Asset: <span id="modal-asset-name" class="text-blue-400 font-semibold">General</span></p>
+
+      <!-- Network / Option Selection -->
+      <label class="block text-xs text-slate-400 mb-2 font-medium">Select Deposit Network</label>
+      <select class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white mb-4 focus:outline-none focus:border-blue-500">
+        <option>USDT (TRC20)</option>
+        <option>Bitcoin (BTC Network)</option>
+        <option>Ethereum (ERC20)</option>
+        <option>Mobile Money / Bank Transfer</option>
+      </select>
+
+      <!-- Wallet Address / Copy -->
+      <label class="block text-xs text-slate-400 mb-2 font-medium">Deposit Address</label>
+      <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-3 mb-6">
+        <input id="wallet-address" type="text" readonly value="0x71C7656EC7ab88b098defB751B7401B5f6d8976F" class="bg-transparent text-xs text-slate-300 w-full outline-none pr-2 font-mono" />
+        <button onclick="copyAddress()" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded transition whitespace-nowrap">
+          Copy
+        </button>
+      </div>
+
+      <!-- Notice -->
+      <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400 text-xs mb-6">
+        ⚠️ Send only the selected asset to this address. Credits apply automatically after network confirmations.
+      </div>
+
+      <button onclick="closeDepositModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold py-2.5 rounded-lg transition">
+        Done
+      </button>
     </div>
   </div>
 
@@ -37,15 +79,20 @@
         data.forEach(coin => {
           const isPositive = coin.price_change_percentage_24h >= 0;
           grid.innerHTML += `
-            <div class="p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-700 transition">
-              <div class="flex items-center justify-between mb-3">
-                <span class="font-bold text-lg">${coin.name}</span>
-                <span class="text-xs uppercase px-2 py-0.5 bg-slate-800 text-slate-400 rounded">${coin.symbol}</span>
+            <div class="p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-700 transition flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="font-bold text-lg text-white">${coin.name}</span>
+                  <span class="text-xs uppercase px-2 py-0.5 bg-slate-800 text-slate-400 rounded">${coin.symbol}</span>
+                </div>
+                <div class="text-2xl font-black mb-1">$${coin.current_price.toLocaleString()}</div>
+                <div class="text-xs font-semibold ${isPositive ? 'text-emerald-400' : 'text-rose-400'} mb-4">
+                  ${isPositive ? '▲' : '▼'} ${coin.price_change_percentage_24h.toFixed(2)}% (24h)
+                </div>
               </div>
-              <div class="text-2xl font-black mb-1">$${coin.current_price.toLocaleString()}</div>
-              <div class="text-xs font-semibold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}">
-                ${isPositive ? '▲' : '▼'} ${coin.price_change_percentage_24h.toFixed(2)}% (24h)
-              </div>
+              <button onclick="openDepositModal('${coin.name}')" class="w-full bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-semibold py-2 rounded-lg transition border border-slate-700 hover:border-blue-500">
+                Deposit ${coin.symbol.toUpperCase()}
+              </button>
             </div>
           `;
         });
@@ -53,6 +100,24 @@
         console.error('Error fetching data:', err);
       }
     }
+
+    function openDepositModal(assetName) {
+      document.getElementById('modal-asset-name').innerText = assetName;
+      document.getElementById('deposit-modal').classList.remove('hidden');
+      document.getElementById('deposit-modal').classList.add('flex');
+    }
+
+    function closeDepositModal() {
+      document.getElementById('deposit-modal').classList.add('hidden');
+      document.getElementById('deposit-modal').classList.remove('flex');
+    }
+
+    function copyAddress() {
+      const addressInput = document.getElementById('wallet-address');
+      navigator.clipboard.writeText(addressInput.value);
+      alert('Deposit address copied to clipboard!');
+    }
+
     fetchCrypto();
   </script>
 </body>
