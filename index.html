@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JM Investment Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen p-6">
+
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <header class="border-b border-slate-800 pb-4 mb-8 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-blue-500">JM Investment Dashboard</h1>
+        <p class="text-xs md:text-sm text-slate-400">Live Asset & Crypto Tracker</p>
+      </div>
+      <span class="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold rounded-full">Live</span>
+    </header>
+
+    <!-- Market Cards -->
+    <div id="crypto-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="p-5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 animate-pulse">
+        Loading live rates...
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchCrypto() {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,cardano');
+        const data = await response.json();
+        const grid = document.getElementById('crypto-grid');
+        grid.innerHTML = '';
+
+        data.forEach(coin => {
+          const isPositive = coin.price_change_percentage_24h >= 0;
+          grid.innerHTML += `
+            <div class="p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-700 transition">
+              <div class="flex items-center justify-between mb-3">
+                <span class="font-bold text-lg">${coin.name}</span>
+                <span class="text-xs uppercase px-2 py-0.5 bg-slate-800 text-slate-400 rounded">${coin.symbol}</span>
+              </div>
+              <div class="text-2xl font-black mb-1">$${coin.current_price.toLocaleString()}</div>
+              <div class="text-xs font-semibold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}">
+                ${isPositive ? '▲' : '▼'} ${coin.price_change_percentage_24h.toFixed(2)}% (24h)
+              </div>
+            </div>
+          `;
+        });
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }
+    fetchCrypto();
+  </script>
+</body>
+</html>
