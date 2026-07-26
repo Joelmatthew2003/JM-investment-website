@@ -389,6 +389,78 @@
       alert(label + ' copied to clipboard!');
     }
 
+ // 1. Initialize Supabase Client
+const SUPABASE_URL = 'https://gqnortjzlegpquvyildh.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_tAVDNin9BslVLBh2KvO37g_ugY-zm_J';
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Sign Up New User
+async function handleSignUp(email, password) {
+    const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert('Sign up failed: ' + error.message);
+    } else {
+        alert('Check your email for the confirmation link!');
+    }
+}
+
+// Log In Existing User
+async function handleLogin(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert('Login failed: ' + error.message);
+    } else {
+        alert('Logged in successfully!');
+        // Hide auth modal / update UI here
+        document.getElementById('auth-modal')?.classList.add('hidden');
+    }
+}
+// Check user status on page load
+async function checkAuthStatus() {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session) {
+        document.getElementById('auth-modal')?.classList.add('hidden');
+    } else {
+        document.getElementById('auth-modal')?.classList.remove('hidden');
+    }
+}
+
+// Hook up your form submission or button clicks
+document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email-input').value;
+    const password = document.getElementById('password-input').value;
+
+    // Call handleLogin or handleSignUp depending on your UI active tab/button
+    await handleLogin(email, password);
+});
+
+// Run check on load
+checkAuthStatus();
+renderPackages('all');
+</script>
+  
+// Log Out User
+async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+    if (error) alert('Logout failed: ' + error.message);
+    else location.reload();
+}
+    
+// 2. Your existing function calls
+checkAuthStatus();
+renderPackages('all');
+</script>
+  
     checkAuthStatus();
     renderPackages('all');
   </script>
