@@ -443,26 +443,8 @@ document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
     // Call handleLogin or handleSignUp depending on your UI active tab/button
     await handleLogin(email, password);
 });
-
-// Run check on load
-checkAuthStatus();
-renderPackages('all');
+  // Run auth check on page load
+  checkAuthStatus();
 </script>
-  
-// Log Out User
-async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) alert('Logout failed: ' + error.message);
-    else location.reload();
-}
-    
-// 2. Your existing function calls
-checkAuthStatus();
-renderPackages('all');
-</script>
-  
-    checkAuthStatus();
-    renderPackages('all');
-  </script>
 </body>
 </html>
